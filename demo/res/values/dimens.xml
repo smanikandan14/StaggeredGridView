@@ -1,0 +1,7 @@
+<resources>
+
+    <!-- Radius -->
+    <dimen name="border_radius">3dp</dimen>
+    
+</resources>
+
