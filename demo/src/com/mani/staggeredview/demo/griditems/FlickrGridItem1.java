@@ -96,7 +96,7 @@ public class FlickrGridItem1 extends StaggeredGridViewItem{
 	@Override
 	public View getView(LayoutInflater inflater, ViewGroup parent) {
 		// TODO Auto-generated method stub
-		mView = inflater.inflate(R.layout.grid_item3, null);
+		mView = inflater.inflate(R.layout.grid_item1, null);
 		ImageView image = (ImageView) mView.findViewById(R.id.image);
         mImageLoader.get(mImage.getImageUrl(), 
 				ImageLoader.getImageListener(image,R.drawable.ic_launcher, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);

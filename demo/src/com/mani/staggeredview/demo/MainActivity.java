@@ -36,6 +36,7 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener2;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.State;
 import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem1;
+import com.mani.staggeredview.demo.griditems.FlickrGridItem2;
 import com.mani.staggeredview.demo.model.FlickrImage;
 import com.mani.staggeredview.demo.model.FlickrResponse;
 import com.mani.staggeredview.demo.model.FlickrResponsePhotos;
@@ -192,8 +193,15 @@ public class MainActivity extends Activity {
 			for(int index = 0 ; index < photos.getPhotos().size(); index++) {
 			
 				FlickrImage flkrImage = photos.getPhotos().get(index);
-				FlickrGridItem1 item = new FlickrGridItem1(flkrImage);
-				mStaggeredView.addItem(item);
+				StaggeredGridViewItem item = null;
+				if( index%2==0) {
+					item = new FlickrGridItem1(flkrImage);
+					mStaggeredView.addItem(item);
+				} else {
+					item = new FlickrGridItem2(flkrImage);
+					mStaggeredView.addItem(item);
+					
+				}
 				
 				
 				/*DataModel model = new DataModel();
