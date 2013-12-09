@@ -1,14 +1,9 @@
 package com.mani.staggeredview.demo;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.nio.ByteBuffer;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -19,7 +14,6 @@ import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -34,15 +28,14 @@ import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLoader.ImageCache;
-import com.android.volley.toolbox.Volley;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.Mode;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnPullEventListener;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener2;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.State;
+import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
+import com.mani.staggeredview.demo.griditems.FlickrGridItem1;
 import com.mani.staggeredview.demo.model.FlickrImage;
 import com.mani.staggeredview.demo.model.FlickrResponse;
 import com.mani.staggeredview.demo.model.FlickrResponsePhotos;
@@ -56,55 +49,11 @@ public class MainActivity extends Activity {
 	private RequestQueue mVolleyQueue;
 	private ProgressDialog mProgress;
 	private ImageLoader mImageLoader;
+	private int currPage=1;
+	GsonRequest<FlickrResponsePhotos> gsonObjRequest;
 	
 	private final String TAG_REQUEST = "MY_TAG";
 
-	/*
-	 * Extends from DisckBasedCache --> Utility from volley toolbox.
-	 * Also implements ImageCache, so that we can pass this custom implementation
-	 * to ImageLoader. 
-	 */
-	public  class DiskBitmapCache extends DiskBasedCache implements ImageCache {
-		 
-	    public DiskBitmapCache(File rootDirectory, int maxCacheSizeInBytes) {
-	        super(rootDirectory, maxCacheSizeInBytes);
-	    }
-	 
-	    public DiskBitmapCache(File cacheDir) {
-	        super(cacheDir);
-	    }
-	 
-	    public Bitmap getBitmap(String url) {
-	        final Entry requestedItem = get(url);
-	 
-	        if (requestedItem == null)
-	            return null;
-	 
-	        return BitmapFactory.decodeByteArray(requestedItem.data, 0, requestedItem.data.length);
-	    }
-	 
-	    public void putBitmap(String url, Bitmap bitmap) {
-	    	final Entry entry = new Entry();
-	        entry.data = convertBitmapToBytes(bitmap) ;
-	        put(url, entry);
-	    }
-	}
-	
-	GsonRequest<FlickrResponsePhotos> gsonObjRequest;
-	
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public static byte[] convertBitmapToBytes(Bitmap bitmap) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			ByteBuffer buffer = ByteBuffer.allocate(bitmap.getByteCount());
-	        bitmap.copyPixelsToBuffer(buffer);
-	        return buffer.array();
-      } else {
-    	  	ByteArrayOutputStream baos = new ByteArrayOutputStream();  
-    	  	bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-	        byte[] data = baos.toByteArray();
-	        return data;
-      }
-    }
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test_layout);
@@ -112,46 +61,12 @@ public class MainActivity extends Activity {
 		actionBarSetup();
 		
 		// Initialise Volley Request Queue. 
-		mVolleyQueue = Volley.newRequestQueue(this);
-
-		int max_cache_size = 1000000;
-		mImageLoader = new ImageLoader(mVolleyQueue, new DiskBitmapCache(getCacheDir(),max_cache_size));
+		mVolleyQueue = StaggeredDemoApplication.getRequestQueue();
+		mImageLoader = StaggeredDemoApplication.getImageLoader();
 		
 		mStaggeredView = (StaggeredGridView) findViewById(R.id.staggeredview);
-		mStaggeredView.init(3);
+		mStaggeredView.init(2);
 		mStaggeredView.setMode(Mode.BOTH);
-		/*MyGridViewItem item = new MyGridViewItem();
-		MyGridViewItem1 item1 = new MyGridViewItem1();
-		MyGridViewItem2 item2 = new MyGridViewItem2();
-		
-		mStaggeredView.addItem(item);
-
-		mStaggeredView.addItem(item2);
-		mStaggeredView.addItem(item1);
-		
-		item = new MyGridViewItem();
-		mStaggeredView.addItem(item);
-		
-		item2 = new MyGridViewItem2();
-		mStaggeredView.addItem(item2);
-
-		item2 = new MyGridViewItem2();
-		mStaggeredView.addItem(item2);
-
-		item1 = new MyGridViewItem1();
-		mStaggeredView.addItem(item1);
-		item = new MyGridViewItem();
-		mStaggeredView.addItem(item);
-		
-
-		item2 = new MyGridViewItem2();
-		mStaggeredView.addItem(item2);
-
-		item2 = new MyGridViewItem2();
-		mStaggeredView.addItem(item2);
-
-		item1 = new MyGridViewItem1();
-		mStaggeredView.addItem(item1);*/
 
 		mStaggeredView.setOnPullEventListener(new OnPullEventListener<ScrollView>() {
 
@@ -160,8 +75,10 @@ public class MainActivity extends Activity {
 					State state, Mode direction) {
 
 				if(direction == Mode.PULL_FROM_START) {
+					System.out.println("########## PULL FROM START ######### ");
 			        refreshView.getLoadingLayoutProxy().setPullLabel("Pull down to refresh");
 				} else if( direction == Mode.PULL_FROM_END) {
+					System.out.println("########## PULL FROM END ######### ");
 					refreshView.getLoadingLayoutProxy().setPullLabel("Pull down to load more data");
 				}
 				
@@ -172,24 +89,18 @@ public class MainActivity extends Activity {
 		mStaggeredView.setOnRefreshListener(new OnRefreshListener2<ScrollView> () {
 			
 			public void onPullDownToRefresh(final PullToRefreshBase<ScrollView> refreshView) {
-		        // Do work to refresh the list here.
 		        new GetDataTask().execute();
 
 			}
 
-			/**
-			 * onPullUpToRefresh will be called only when the user has Pulled from
-			 * the end, and released.
-			 */
 			public void onPullUpToRefresh(final PullToRefreshBase<ScrollView> refreshView) {
-		        // Do work to refresh the list here.
-		        new GetDataTask().execute();
-
+		        //new GetDataTask().execute();
+				flickerGetImagesRequest();
 			}
 		});
 		
 		showProgress();
-		makeSampleHttpRequest();
+		flickerGetImagesRequest();
 	}
 	
 	
@@ -197,7 +108,7 @@ public class MainActivity extends Activity {
 	private void actionBarSetup() {
 	  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 	    ActionBar ab = getActionBar();
-	    ab.setTitle("GSONResponseParsing");
+	    ab.setTitle("StaggeredGridView Demo");
 	  }
 	}
 	
@@ -207,7 +118,7 @@ public class MainActivity extends Activity {
 			mProgress.dismiss();
 	}
 	  
-	private void makeSampleHttpRequest() {
+	private void flickerGetImagesRequest() {
 		
 		String url = "http://api.flickr.com/services/rest";
 		Uri.Builder builder = Uri.parse(url).buildUpon();
@@ -215,6 +126,8 @@ public class MainActivity extends Activity {
 		builder.appendQueryParameter("method", "flickr.interestingness.getList");
 		builder.appendQueryParameter("format", "json");
 		builder.appendQueryParameter("nojsoncallback", "1");
+		builder.appendQueryParameter("per_page", "20");
+		builder.appendQueryParameter("page", Integer.toString(currPage));
 		
 		System.out.println("########## Flickr image request url ########### "+builder.toString());
 		
@@ -222,8 +135,12 @@ public class MainActivity extends Activity {
 				FlickrResponsePhotos.class, null, new Response.Listener<FlickrResponsePhotos>() {
 			@Override
 			public void onResponse(FlickrResponsePhotos response) {
-				try {
-					parseFlickrImageResponse(response);
+				try { 
+					if(response != null) {
+						mStaggeredView.onRefreshComplete();
+						parseFlickrImageResponse(response);
+						currPage++;
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					showToast("JSON parse error");
@@ -247,7 +164,7 @@ public class MainActivity extends Activity {
 				} else if( error instanceof NoConnectionError) {
 				} else if( error instanceof TimeoutError) {
 				}
-
+				mStaggeredView.onRefreshComplete();
 				stopProgress();
 				showToast(error.getMessage());
 			}
@@ -275,7 +192,7 @@ public class MainActivity extends Activity {
 			for(int index = 0 ; index < photos.getPhotos().size(); index++) {
 			
 				FlickrImage flkrImage = photos.getPhotos().get(index);
-				MyGridViewItem item = new MyGridViewItem(flkrImage);
+				FlickrGridItem1 item = new FlickrGridItem1(flkrImage);
 				mStaggeredView.addItem(item);
 				
 				

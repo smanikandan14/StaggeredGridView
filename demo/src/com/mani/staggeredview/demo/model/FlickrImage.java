@@ -9,7 +9,6 @@ package com.mani.staggeredview.demo.model;
  */
 public class FlickrImage {
 
-	
 	String id;
 	
 	String secret;
@@ -20,6 +19,8 @@ public class FlickrImage {
 	
 	String title;
 
+	String owner;
+	
 	public String getId() {
 		return id;
 	}
@@ -59,7 +60,15 @@ public class FlickrImage {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	
+
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
 	public String getImageUrl() {
 		String imageUrl = "http://farm" + getFarm() + ".static.flickr.com/" + getServer()
 				+ "/" + getId() + "_" + getSecret() + "_b.jpg";

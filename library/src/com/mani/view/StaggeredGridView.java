@@ -21,6 +21,7 @@ public class StaggeredGridView extends PullToRefreshScrollView{
 	private Context mContext;
 	private int mColumnCount;
 	
+	private View mFirstChild;
 	private LinearLayout mTopLayout;
 	private ArrayList<LinearLayout> mGridLayouts;
 	private ArrayList<Integer> mItemsHeight;
@@ -28,6 +29,16 @@ public class StaggeredGridView extends PullToRefreshScrollView{
 	private int mColumnIndexToAdd = 0;
 	private int showedItemCount = 0;
 	
+	private final int SCROLL_OFFSET=3;
+	
+	public interface OnScrollListener {
+		public void onTop();
+		public void onScroll();
+		public void onBottom();
+	}
+	
+	private OnScrollListener mScrollListener;
+
 	public StaggeredGridView(Context context) {
 		super(context);
 		mContext = context;
@@ -58,6 +69,7 @@ public class StaggeredGridView extends PullToRefreshScrollView{
 			mItemsHeight.add(Integer.valueOf(i));
 		}
 		this.addView(mTopLayout);
+		mFirstChild = getChildAt(0);
 	}
 	
 	public void clear() {
@@ -72,6 +84,31 @@ public class StaggeredGridView extends PullToRefreshScrollView{
 		}
 
 		this.smoothScrollTo(0);
+	}
+
+	public OnScrollListener getOnEndScrollListener() {
+		return mScrollListener;
+	}
+
+	public void setOnEndScrollListener(OnScrollListener mOnEndScrollListener) {
+		this.mScrollListener = mOnEndScrollListener;
+	}
+
+	@Override
+	protected void onScrollChanged(int x, int y, int oldX, int oldY) {
+		super.onScrollChanged(x, y, oldX, oldY);
+		if (Math.abs(y - oldY) < 2 || y+getHeight() >= mFirstChild.getMeasuredHeight() || y <= SCROLL_OFFSET+1) {
+			if (mScrollListener != null) {
+				if (y <= SCROLL_OFFSET+1) {
+					mScrollListener.onTop();
+
+				} else if (y+getHeight() >= mFirstChild.getMeasuredHeight()) {
+					mScrollListener.onBottom();
+				}
+			}
+		} else {
+			mScrollListener.onScroll();
+		}
 	}
 
 	public void addItem(StaggeredGridViewItem item) {
