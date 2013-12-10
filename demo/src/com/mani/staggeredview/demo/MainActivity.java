@@ -37,8 +37,9 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase.State;
 import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem1;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem2;
+import com.mani.staggeredview.demo.griditems.FlickrGridItem3;
+import com.mani.staggeredview.demo.model.FlickrGetImagesResponse;
 import com.mani.staggeredview.demo.model.FlickrImage;
-import com.mani.staggeredview.demo.model.FlickrResponse;
 import com.mani.staggeredview.demo.model.FlickrResponsePhotos;
 import com.mani.staggeredview.demo.volley.GsonRequest;
 import com.mani.view.StaggeredGridView;
@@ -189,7 +190,7 @@ public class MainActivity extends Activity {
 	
 	private void parseFlickrImageResponse(FlickrResponsePhotos response) {
 		
-			FlickrResponse photos = response.getPhotos();
+			FlickrGetImagesResponse photos = response.getPhotos();
 			for(int index = 0 ; index < photos.getPhotos().size(); index++) {
 			
 				FlickrImage flkrImage = photos.getPhotos().get(index);
@@ -197,18 +198,15 @@ public class MainActivity extends Activity {
 				if( index%2==0) {
 					item = new FlickrGridItem1(flkrImage);
 					mStaggeredView.addItem(item);
+				} else if( index%3==0) {
+					item = new FlickrGridItem3(flkrImage);
+					mStaggeredView.addItem(item);
+					
 				} else {
 					item = new FlickrGridItem2(flkrImage);
 					mStaggeredView.addItem(item);
 					
 				}
-				
-				
-				/*DataModel model = new DataModel();
-				model.setImageUrl(imageUrl);
-				model.setTitle(flkrImage.getTitle());
-				mDataList.add(model); */
-
 			}
 	}
 	
@@ -231,108 +229,7 @@ public class MainActivity extends Activity {
 
                 super.onPostExecute(result);
         }
-}
-
-	public class MyGridViewItem extends StaggeredGridViewItem {
-
-		private int mHeight = 0;
-		private View mView = null;
-		private FlickrImage mImage = null;
-		
-		public MyGridViewItem(FlickrImage flkrImage) {
-			mImage = flkrImage;
-		}
-		
-		@Override
-		public View getView(LayoutInflater inflater, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			mView = inflater.inflate(R.layout.grid_item3, null);
-			ImageView image = (ImageView) mView.findViewById(R.id.image);
-            mImageLoader.get(mImage.getImageUrl(), 
-					ImageLoader.getImageListener(image,R.drawable.ic_launcher, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
-			
-			mView.setOnClickListener(new View.OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					System.out.println("######## GridView Item onclick########### ");
-				}
-			});
-			return mView;
-		}
-
-		@Override
-		public int getViewHeight(LayoutInflater inflater, ViewGroup parent) {
-			FrameLayout item_containerFrameLayout = (FrameLayout)mView.findViewById(R.id.container);
-			item_containerFrameLayout.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-			mHeight = item_containerFrameLayout.getMeasuredHeight();
-			System.out.println("########## Height ######## "+mHeight);
-			return mHeight;
-		}
-		
-	}
-	
-	public class MyGridViewItem1 extends StaggeredGridViewItem {
-
-		private int mHeight = 0;
-		@Override
-		public View getView(LayoutInflater inflater, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			View view = inflater.inflate(R.layout.grid_item1, null);
-			FrameLayout item_containerFrameLayout = (FrameLayout)view.findViewById(R.id.container);
-			item_containerFrameLayout.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-			mHeight = item_containerFrameLayout.getMeasuredHeight();
-			System.out.println("########## Height ######## "+mHeight);
-			
-			view.setOnClickListener(new View.OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					System.out.println("######## GridView Item 1 onclick########### ");
-				}
-			});
-			return view;
-		}
-
-		@Override
-		public int getViewHeight(LayoutInflater inflater, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			return mHeight;
-		}
-		
 	}
 
-	
-	public class MyGridViewItem2 extends StaggeredGridViewItem {
-
-		private int mHeight = 0;
-		@Override
-		public View getView(LayoutInflater inflater, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			View view = inflater.inflate(R.layout.grid_item2, null);
-			FrameLayout item_containerFrameLayout = (FrameLayout)view.findViewById(R.id.container);
-			item_containerFrameLayout.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-			mHeight = item_containerFrameLayout.getMeasuredHeight();
-			System.out.println("########## Height ######## "+mHeight);
-			view.setOnClickListener(new View.OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					System.out.println("######## GridView Item 2 onclick########### ");
-				}
-			});
-			return view;
-		}
-
-		@Override
-		public int getViewHeight(LayoutInflater inflater, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			return mHeight;
-		}
-		
-	}
 
 }

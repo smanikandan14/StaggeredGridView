@@ -3,10 +3,12 @@ package com.mani.staggeredview.demo.griditems;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.ClientError;
@@ -23,7 +25,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.mani.staggeredview.demo.R;
 import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
 import com.mani.staggeredview.demo.model.FlickrImage;
-import com.mani.staggeredview.demo.model.FlickrResponsePhotos;
+import com.mani.staggeredview.demo.model.FlickrProfileResponse;
 import com.mani.staggeredview.demo.volley.GsonRequest;
 import com.mani.view.StaggeredGridViewItem;
 
@@ -34,6 +36,9 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 	private FlickrImage mImage;
 	private String mUserId;
 	private View mView;
+	private TextView mProfileName;
+	private ImageView mProfileImage;
+	
 	private int mHeight;
 	
 	public FlickrGridItem3(FlickrImage image) {
@@ -55,12 +60,20 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 		
 		System.out.println("########## Flickr image request url ########### "+builder.toString());
 		
-		GsonRequest<FlickrResponsePhotos> gsonObjRequest = new GsonRequest<FlickrResponsePhotos>(Request.Method.GET, builder.toString(),
-				FlickrResponsePhotos.class, null, new Response.Listener<FlickrResponsePhotos>() {
+		GsonRequest<FlickrProfileResponse> gsonObjRequest = new GsonRequest<FlickrProfileResponse>(Request.Method.GET, builder.toString(),
+				FlickrProfileResponse.class, null, new Response.Listener<FlickrProfileResponse>() {
 			@Override
-			public void onResponse(FlickrResponsePhotos response) {
+			public void onResponse(FlickrProfileResponse response) {
 				try { 
+					System.out.println("########## OnResponse not null ########## "+response);
 					if(response != null) {
+						System.out.println("########## Response not null ########### "+response.getPerson().getProfileImageUrl()+" : "+
+								response.getPerson().getRealname());
+				        mImageLoader.get(response.getPerson().getProfileImageUrl(), 
+								ImageLoader.getImageListener(mProfileImage, R.drawable.ic_launcher, android.R.drawable.ic_dialog_alert));
+				        if(response.getPerson().getRealname().get_content() != null)
+				        mProfileName.setText(response.getPerson().getRealname().get_content());
+
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -83,6 +96,7 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 				} else if( error instanceof NoConnectionError) {
 				} else if( error instanceof TimeoutError) {
 				}
+				System.out.println("########## onError ########## "+error.getMessage());
 			}
 		});
 		mVolleyQueue.add(gsonObjRequest);
@@ -91,8 +105,11 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 	@Override
 	public View getView(LayoutInflater inflater, ViewGroup parent) {
 		// TODO Auto-generated method stub
-		mView = inflater.inflate(R.layout.grid_item1, null);
+		mView = inflater.inflate(R.layout.grid_item3, null);
 		ImageView image = (ImageView) mView.findViewById(R.id.image);
+		mProfileImage = (ImageView)mView.findViewById(R.id.profile_image);
+		mProfileName = (TextView) mView.findViewById(R.id.profile_name);
+		
         mImageLoader.get(mImage.getImageUrl(), 
 				ImageLoader.getImageListener(image,R.drawable.ic_launcher, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
 		
@@ -104,13 +121,13 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 				System.out.println("######## GridView Item onclick########### ");
 			}
 		});
-		//flickerGetUserRequest();
+		flickerGetUserRequest();
 		return mView;
 	}
 
 	@Override
 	public int getViewHeight(LayoutInflater inflater, ViewGroup parent) {
-		FrameLayout item_containerFrameLayout = (FrameLayout)mView.findViewById(R.id.container);
+		RelativeLayout item_containerFrameLayout = (RelativeLayout)mView.findViewById(R.id.container);
 		item_containerFrameLayout.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 		mHeight = item_containerFrameLayout.getMeasuredHeight();
 		System.out.println("########## Height ######## "+mHeight);

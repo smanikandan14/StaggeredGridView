@@ -34,63 +34,14 @@ import com.mani.view.StaggeredGridViewItem;
  */
 public class FlickrGridItem1 extends StaggeredGridViewItem{
 
-	private RequestQueue mVolleyQueue;
 	private ImageLoader mImageLoader;
 	private FlickrImage mImage;
-	private String mUserId;
 	private View mView;
 	private int mHeight;
 	
 	public FlickrGridItem1(FlickrImage image) {
 		mImage=image;
-		mUserId=image.getOwner();
-		mVolleyQueue=StaggeredDemoApplication.getRequestQueue();
 		mImageLoader=StaggeredDemoApplication.getImageLoader();
-	}
-	
-	private void flickerGetUserRequest() {
-		
-		String url = "http://api.flickr.com/services/rest";
-		Uri.Builder builder = Uri.parse(url).buildUpon();
-		builder.appendQueryParameter("api_key", "5e045abd4baba4bbcd866e1864ca9d7b");
-		builder.appendQueryParameter("method", "flickr.people.getInfo");
-		builder.appendQueryParameter("format", "json");
-		builder.appendQueryParameter("nojsoncallback", "1");
-		builder.appendQueryParameter("user_id", mUserId);
-		
-		System.out.println("########## Flickr image request url ########### "+builder.toString());
-		
-		GsonRequest<FlickrResponsePhotos> gsonObjRequest = new GsonRequest<FlickrResponsePhotos>(Request.Method.GET, builder.toString(),
-				FlickrResponsePhotos.class, null, new Response.Listener<FlickrResponsePhotos>() {
-			@Override
-			public void onResponse(FlickrResponsePhotos response) {
-				try { 
-					if(response != null) {
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}, new Response.ErrorListener() {
-
-			@Override
-			public void onErrorResponse(VolleyError error) {
-				// Handle your error types accordingly.For Timeout & No connection error, you can show 'retry' button.
-				// For AuthFailure, you can re login with user credentials.
-				// For ClientError, 400 & 401, Errors happening on client side when sending api request.
-				// In this case you can check how client is forming the api and debug accordingly.
-				// For ServerError 5xx, you can do retry or handle accordingly.
-				if( error instanceof NetworkError) {
-				} else if( error instanceof ClientError) { 
-				} else if( error instanceof ServerError) {
-				} else if( error instanceof AuthFailureError) {
-				} else if( error instanceof ParseError) {
-				} else if( error instanceof NoConnectionError) {
-				} else if( error instanceof TimeoutError) {
-				}
-			}
-		});
-		mVolleyQueue.add(gsonObjRequest);
 	}
 	
 	@Override
@@ -109,7 +60,6 @@ public class FlickrGridItem1 extends StaggeredGridViewItem{
 				System.out.println("######## GridView Item onclick########### ");
 			}
 		});
-		//flickerGetUserRequest();
 		return mView;
 	}
 

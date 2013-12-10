@@ -3,13 +3,13 @@ package com.mani.staggeredview.demo.model;
 
 public class FlickrResponsePhotos {
 
-	FlickrResponse photos;
+	FlickrGetImagesResponse photos;
 		
-	public FlickrResponse getPhotos() {
+	public FlickrGetImagesResponse getPhotos() {
 		return photos;
 	}
 
-	public void setPhotos(FlickrResponse photos) {
+	public void setPhotos(FlickrGetImagesResponse photos) {
 		this.photos = photos;
 	}
 
