@@ -46,6 +46,23 @@ public class FlickrProfile {
 		this.path_alias = path_alias;
 	}
 
+	public String getProfileName() {
+		if(realname.get_content() == null || realname.get_content().length()==0) {
+			return username.get_content();
+		} else {
+			return realname.get_content();
+		}
+	}
+	
+	
+	public FlickrProfileRealName getUsername() {
+		return username;
+	}
+
+	public void setUsername(FlickrProfileRealName username) {
+		this.username = username;
+	}
+
 	public FlickrProfileRealName getRealname() {
 		return realname;
 	}

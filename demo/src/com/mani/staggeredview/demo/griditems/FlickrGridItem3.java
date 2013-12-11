@@ -1,11 +1,12 @@
 package com.mani.staggeredview.demo.griditems;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -38,17 +39,20 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 	private View mView;
 	private TextView mProfileName;
 	private ImageView mProfileImage;
-	
+	private String mProfileUrl;
 	private int mHeight;
+	private  Context mContext;
 	
-	public FlickrGridItem3(FlickrImage image) {
+	public FlickrGridItem3(Context context, FlickrImage image) {
+		mContext = context;
 		mImage=image;
 		mUserId=image.getOwner();
+		mProfileUrl = "http://www.flickr.com/people/"+mUserId;
 		mVolleyQueue=StaggeredDemoApplication.getRequestQueue();
 		mImageLoader=StaggeredDemoApplication.getImageLoader();
 	}
 	
-	private void flickerGetUserRequest() {
+	private void flickrGetUserRequest() {
 		
 		String url = "http://api.flickr.com/services/rest";
 		Uri.Builder builder = Uri.parse(url).buildUpon();
@@ -70,10 +74,8 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 						System.out.println("########## Response not null ########### "+response.getPerson().getProfileImageUrl()+" : "+
 								response.getPerson().getRealname());
 				        mImageLoader.get(response.getPerson().getProfileImageUrl(), 
-								ImageLoader.getImageListener(mProfileImage, R.drawable.ic_launcher, android.R.drawable.ic_dialog_alert));
-				        if(response.getPerson().getRealname().get_content() != null)
-				        mProfileName.setText(response.getPerson().getRealname().get_content());
-
+								ImageLoader.getImageListener(mProfileImage, R.drawable.bg_no_image, android.R.drawable.ic_dialog_alert));
+				        mProfileName.setText(response.getPerson().getProfileName());
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -111,17 +113,16 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 		mProfileName = (TextView) mView.findViewById(R.id.profile_name);
 		
         mImageLoader.get(mImage.getImageUrl(), 
-				ImageLoader.getImageListener(image,R.drawable.ic_launcher, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
+				ImageLoader.getImageListener(image,R.drawable.bg_no_image, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
 		
 		mView.setOnClickListener(new View.OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				System.out.println("######## GridView Item onclick########### ");
+				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mProfileUrl));
+				mContext.startActivity(browserIntent);
 			}
 		});
-		flickerGetUserRequest();
+		flickrGetUserRequest();
 		return mView;
 	}
 

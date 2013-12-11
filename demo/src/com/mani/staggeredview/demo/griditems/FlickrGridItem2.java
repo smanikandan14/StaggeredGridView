@@ -31,7 +31,7 @@ public class FlickrGridItem2 extends StaggeredGridViewItem{
 		ImageView image = (ImageView) mView.findViewById(R.id.image);
 		TextView title = (TextView) mView.findViewById(R.id.title);
         mImageLoader.get(mImage.getImageUrl(), 
-				ImageLoader.getImageListener(image,R.drawable.ic_launcher, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
+				ImageLoader.getImageListener(image,R.drawable.bg_no_image, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
 		
 		mView.setOnClickListener(new View.OnClickListener() {
 			

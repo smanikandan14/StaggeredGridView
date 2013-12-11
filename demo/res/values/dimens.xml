@@ -2,6 +2,8 @@
 
     <!-- Radius -->
     <dimen name="border_radius">3dp</dimen>
+    <dimen name="margin_normal">5dp</dimen>
+    <dimen name="padding_small">2dp</dimen>
     <dimen name="padding_normal">10dp</dimen>
 </resources>
 

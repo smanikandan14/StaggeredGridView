@@ -50,14 +50,14 @@ public class FlickrGridItem1 extends StaggeredGridViewItem{
 		mView = inflater.inflate(R.layout.grid_item1, null);
 		ImageView image = (ImageView) mView.findViewById(R.id.image);
         mImageLoader.get(mImage.getImageUrl(), 
-				ImageLoader.getImageListener(image,R.drawable.ic_launcher, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
+				ImageLoader.getImageListener(image,R.drawable.bg_no_image, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
 		
 		mView.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				System.out.println("######## GridView Item onclick########### ");
+				System.out.println("######## GridView Item onclick########### "+mImage.getId()+" : "+mImage.getImageUrl());
 			}
 		});
 		return mView;
@@ -68,7 +68,6 @@ public class FlickrGridItem1 extends StaggeredGridViewItem{
 		FrameLayout item_containerFrameLayout = (FrameLayout)mView.findViewById(R.id.container);
 		item_containerFrameLayout.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 		mHeight = item_containerFrameLayout.getMeasuredHeight();
-		System.out.println("########## Height ######## "+mHeight);
 		return mHeight;
 	}
 }

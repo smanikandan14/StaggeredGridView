@@ -8,12 +8,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -35,9 +29,9 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase.OnPullEventListener;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener2;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.State;
 import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
-import com.mani.staggeredview.demo.griditems.FlickrGridItem1;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem2;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem3;
+import com.mani.staggeredview.demo.griditems.FlickrGridItem4;
 import com.mani.staggeredview.demo.model.FlickrGetImagesResponse;
 import com.mani.staggeredview.demo.model.FlickrImage;
 import com.mani.staggeredview.demo.model.FlickrResponsePhotos;
@@ -196,10 +190,10 @@ public class MainActivity extends Activity {
 				FlickrImage flkrImage = photos.getPhotos().get(index);
 				StaggeredGridViewItem item = null;
 				if( index%2==0) {
-					item = new FlickrGridItem1(flkrImage);
+					item = new FlickrGridItem4(this,flkrImage);
 					mStaggeredView.addItem(item);
 				} else if( index%3==0) {
-					item = new FlickrGridItem3(flkrImage);
+					item = new FlickrGridItem3(this,flkrImage);
 					mStaggeredView.addItem(item);
 					
 				} else {

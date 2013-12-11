@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" 
+    android:background="@drawable/bg_grid_item">
+
+    <ImageView
+        android:id="@+id/image"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:scaleType="fitXY"/>
+
+    <View
+        android:id="@+id/line"
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/image"
+        android:background="#D9D2BF"/>
+    
+<RelativeLayout 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" 
+    android:padding="@dimen/padding_normal"
+    android:background="@drawable/bg_profile"
+    android:layout_below="@id/line">
+        
+    <TextView
+        android:id="@+id/comment1"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:textColor="#000000"
+		android:maxLines="2"
+		android:ellipsize="end"
+	    android:layout_marginLeft="@dimen/padding_small"/>
+
+	<TextView
+        android:id="@+id/comment2"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:textColor="#000000"
+		android:maxLines="2"
+		android:ellipsize="end"
+	    android:layout_below="@id/comment1"
+	    android:layout_marginLeft="@dimen/padding_small"/>
+    
+    <TextView
+        android:id="@+id/comment3"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:textColor="#000000"
+		android:maxLines="2"
+		android:ellipsize="end"
+	    android:layout_below="@id/comment2"
+	    android:layout_marginLeft="@dimen/padding_small"/>
+    	    
+    <TextView
+        android:id="@+id/comment4"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@id/comment3"
+	    android:textColor="#000000"
+		android:maxLines="2"
+		android:ellipsize="end"
+	    android:layout_marginLeft="@dimen/padding_small"/>
+    
+    </RelativeLayout>
+    
+</RelativeLayout>    
