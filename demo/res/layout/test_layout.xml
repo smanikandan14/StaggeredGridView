@@ -9,4 +9,32 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent" />
     
+        <RelativeLayout
+            android:id="@+id/footer"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:background="@color/bg_transparent_80"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="@dimen/padding_normal" >
+
+            <ProgressBar
+                android:id="@+id/search_progressbar"
+                style="?android:attr/progressBarStyleInverse"
+                android:layout_width="@dimen/progress_width"
+                android:layout_height="@dimen/progress_height"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:indeterminate="true" />
+
+            <TextView
+                android:id="@+id/search_progress_message"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/margin_normal"
+                android:layout_toRightOf="@id/search_progressbar"
+                android:text="@string/loading_more" />
+        </RelativeLayout>    
 </FrameLayout>    

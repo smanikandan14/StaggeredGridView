@@ -29,6 +29,7 @@ public class StaggeredGridView extends PullToRefreshScrollView{
 	private int mColumnIndexToAdd = 0;
 	private int showedItemCount = 0;
 	
+	
 	private final int SCROLL_OFFSET=3;
 	
 	public interface OnScrollListener {
@@ -86,23 +87,26 @@ public class StaggeredGridView extends PullToRefreshScrollView{
 		this.smoothScrollTo(0);
 	}
 
-	public OnScrollListener getOnEndScrollListener() {
+	public OnScrollListener getScrollListener() {
 		return mScrollListener;
 	}
 
-	public void setOnEndScrollListener(OnScrollListener mOnEndScrollListener) {
+	public void setOnScrollListener(OnScrollListener mOnEndScrollListener) {
 		this.mScrollListener = mOnEndScrollListener;
 	}
 
 	@Override
 	protected void onScrollChanged(int x, int y, int oldX, int oldY) {
 		super.onScrollChanged(x, y, oldX, oldY);
+		System.out.println("####### onScrollChanged ######### ");
 		if (Math.abs(y - oldY) < 2 || y+getHeight() >= mFirstChild.getMeasuredHeight() || y <= SCROLL_OFFSET+1) {
 			if (mScrollListener != null) {
 				if (y <= SCROLL_OFFSET+1) {
+					System.out.println("####### onScrollChanged onTop ######### ");
 					mScrollListener.onTop();
 
 				} else if (y+getHeight() >= mFirstChild.getMeasuredHeight()) {
+					System.out.println("####### onScrollChanged onBottom ######### ");
 					mScrollListener.onBottom();
 				}
 			}

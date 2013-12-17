@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -38,6 +40,7 @@ import com.mani.staggeredview.demo.model.FlickrResponsePhotos;
 import com.mani.staggeredview.demo.volley.GsonRequest;
 import com.mani.view.StaggeredGridView;
 import com.mani.view.StaggeredGridViewItem;
+import com.mani.view.StaggeredGridView.OnScrollListener;
 
 public class MainActivity extends Activity {
 
@@ -48,8 +51,31 @@ public class MainActivity extends Activity {
 	private int currPage=1;
 	GsonRequest<FlickrResponsePhotos> gsonObjRequest;
 	
+	private RelativeLayout mListFooter;
+	private boolean isLoading = false;
+	
 	private final String TAG_REQUEST = "MY_TAG";
-
+	
+	
+	private OnScrollListener scrollListener = new OnScrollListener() {
+		
+		@Override
+		public void onTop() {
+			System.out.println("######## onTOp() ########## ");
+		}
+		
+		@Override
+		public void onScroll() {
+			System.out.println("######## onScroll() ########## ");
+		}
+		
+		@Override
+		public void onBottom() {
+			System.out.println("######## onBottom() ########## ");
+			loadMoreData();
+		}
+	};
+	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test_layout);
@@ -62,7 +88,7 @@ public class MainActivity extends Activity {
 		
 		mStaggeredView = (StaggeredGridView) findViewById(R.id.staggeredview);
 		mStaggeredView.init(2);
-		mStaggeredView.setMode(Mode.BOTH);
+		mStaggeredView.setMode(Mode.DISABLED);
 
 		mStaggeredView.setOnPullEventListener(new OnPullEventListener<ScrollView>() {
 
@@ -90,10 +116,15 @@ public class MainActivity extends Activity {
 			}
 
 			public void onPullUpToRefresh(final PullToRefreshBase<ScrollView> refreshView) {
-		        //new GetDataTask().execute();
 				flickerGetImagesRequest();
 			}
 		});
+		
+		mListFooter = (RelativeLayout) findViewById(R.id.footer);
+		
+		if(mStaggeredView.getMode() == Mode.DISABLED) {
+			mStaggeredView.setOnScrollListener(scrollListener);
+		}
 		
 		showProgress();
 		flickerGetImagesRequest();
@@ -114,6 +145,16 @@ public class MainActivity extends Activity {
 			mProgress.dismiss();
 	}
 	  
+	private void loadMoreData() {
+		if ( isLoading )
+			return;
+
+		mListFooter.setVisibility(View.VISIBLE);
+		isLoading = true;
+		flickerGetImagesRequest();
+	}
+
+	
 	private void flickerGetImagesRequest() {
 		
 		String url = "http://api.flickr.com/services/rest";
@@ -175,6 +216,8 @@ public class MainActivity extends Activity {
 	}
 	
 	private void stopProgress() {
+		isLoading = false;
+		mListFooter.setVisibility(View.GONE);
 		mProgress.cancel();
 	}
 	

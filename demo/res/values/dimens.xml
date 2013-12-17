@@ -5,5 +5,10 @@
     <dimen name="margin_normal">5dp</dimen>
     <dimen name="padding_small">2dp</dimen>
     <dimen name="padding_normal">10dp</dimen>
+    
+    <!--  ProgressBar -->
+    <dimen name="progress_width">48dp</dimen>
+    <dimen name="progress_height">48dp</dimen>
+    
 </resources>
 
