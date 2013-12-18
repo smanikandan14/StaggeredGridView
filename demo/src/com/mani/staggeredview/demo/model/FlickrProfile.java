@@ -47,11 +47,17 @@ public class FlickrProfile {
 	}
 
 	public String getProfileName() {
-		if(realname.get_content() == null || realname.get_content().length()==0) {
-			return username.get_content();
+		String profileName = null;
+		if(username.get_content() != null ) {
+			if(username.get_content().length() > 0) {
+				profileName =  username.get_content();
+			} else {
+				profileName = realname.get_content();
+			}
 		} else {
-			return realname.get_content();
+			profileName = realname.get_content();
 		}
+		return profileName;
 	}
 	
 	

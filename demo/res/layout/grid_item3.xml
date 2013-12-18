@@ -11,19 +11,12 @@
 	    android:layout_height="wrap_content"
 	    android:scaleType="fitXY"/>
 
-    <View
-        android:id="@+id/line"
-        android:layout_width="fill_parent"
-        android:layout_height="2dp"
-        android:layout_below="@id/image"
-        android:background="#D9D2BF"/>
-    
 <RelativeLayout 
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" 
     android:padding="@dimen/padding_normal"
     android:background="@drawable/bg_profile"
-    android:layout_below="@id/line">
+    android:layout_below="@id/image">
         
     <ImageView
         android:id="@+id/profile_image"
