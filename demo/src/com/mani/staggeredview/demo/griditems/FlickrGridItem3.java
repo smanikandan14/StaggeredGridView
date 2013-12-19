@@ -62,16 +62,14 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 		builder.appendQueryParameter("nojsoncallback", "1");
 		builder.appendQueryParameter("user_id", mUserId);
 		
-		System.out.println("########## Flickr image request url ########### "+builder.toString());
-		
 		GsonRequest<FlickrProfileResponse> gsonObjRequest = new GsonRequest<FlickrProfileResponse>(Request.Method.GET, builder.toString(),
 				FlickrProfileResponse.class, null, new Response.Listener<FlickrProfileResponse>() {
 			@Override
 			public void onResponse(FlickrProfileResponse response) {
 				try { 
-					System.out.println("########## OnResponse not null ########## "+response);
+					System.out.println("########## FlickrProfileResponse not null ########## "+response);
 					if(response != null) {
-						System.out.println("########## Response not null ########### "+response.getPerson().getProfileImageUrl()+" : "+
+						System.out.println("########## FlickrProfileResponse not null ########### "+response.getPerson().getProfileImageUrl()+" : "+
 								response.getPerson().getRealname());
 				        mImageLoader.get(response.getPerson().getProfileImageUrl(), 
 								ImageLoader.getImageListener(mProfileImage, R.drawable.bg_no_image, android.R.drawable.ic_dialog_alert));
@@ -131,7 +129,6 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 		RelativeLayout item_containerFrameLayout = (RelativeLayout)mView.findViewById(R.id.container);
 		item_containerFrameLayout.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 		mHeight = item_containerFrameLayout.getMeasuredHeight();
-		System.out.println("########## Height ######## "+mHeight);
 		return mHeight;
 	}
 

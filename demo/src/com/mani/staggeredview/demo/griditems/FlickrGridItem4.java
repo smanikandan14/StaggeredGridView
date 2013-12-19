@@ -68,14 +68,12 @@ public class FlickrGridItem4 extends StaggeredGridViewItem{
 		builder.appendQueryParameter("nojsoncallback", "1");
 		builder.appendQueryParameter("photo_id", mImage.getId());
 		
-		System.out.println("########## Flickr image request url ########### "+builder.toString());
-		
 		GsonRequest<FlickrGetCommentsResponse> gsonObjRequest = new GsonRequest<FlickrGetCommentsResponse>(Request.Method.GET, builder.toString(),
 				FlickrGetCommentsResponse.class, null, new Response.Listener<FlickrGetCommentsResponse>() {
 			@Override
 			public void onResponse(FlickrGetCommentsResponse response) {
 				try { 
-					System.out.println("########## OnResponse not null ########## "+response);
+					System.out.println("########## FlickrGetCommentsResponse not null ########## "+response);
 					if(response != null) {
 						int count=0;
 						for(FlickrComment comment: response.getComments().getComments()) {
@@ -147,7 +145,6 @@ public class FlickrGridItem4 extends StaggeredGridViewItem{
 		RelativeLayout item_containerFrameLayout = (RelativeLayout)mView.findViewById(R.id.container);
 		item_containerFrameLayout.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 		mHeight = item_containerFrameLayout.getMeasuredHeight();
-		System.out.println("########## Height ######## "+mHeight);
 		return mHeight;
 	}
 

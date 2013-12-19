@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -25,12 +24,8 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.PullToRefreshBase.Mode;
-import com.handmark.pulltorefresh.library.PullToRefreshBase.OnPullEventListener;
-import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener2;
-import com.handmark.pulltorefresh.library.PullToRefreshBase.State;
 import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
+import com.mani.staggeredview.demo.griditems.FlickrGridItem1;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem2;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem3;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem4;
@@ -39,15 +34,14 @@ import com.mani.staggeredview.demo.model.FlickrImage;
 import com.mani.staggeredview.demo.model.FlickrResponsePhotos;
 import com.mani.staggeredview.demo.volley.GsonRequest;
 import com.mani.view.StaggeredGridView;
-import com.mani.view.StaggeredGridViewItem;
 import com.mani.view.StaggeredGridView.OnScrollListener;
+import com.mani.view.StaggeredGridViewItem;
 
 public class MainActivity extends Activity {
 
 	private StaggeredGridView mStaggeredView;
 	private RequestQueue mVolleyQueue;
 	private ProgressDialog mProgress;
-	private ImageLoader mImageLoader;
 	private int currPage=1;
 	GsonRequest<FlickrResponsePhotos> gsonObjRequest;
 	
@@ -58,22 +52,24 @@ public class MainActivity extends Activity {
 	
 	
 	private OnScrollListener scrollListener = new OnScrollListener() {
-		
-		@Override
 		public void onTop() {
 			System.out.println("######## onTOp() ########## ");
 		}
 		
-		@Override
 		public void onScroll() {
 			System.out.println("######## onScroll() ########## ");
 		}
 		
-		@Override
+		public void onItemsBefore() {
+			System.out.println("######## onItemsBefore() ########## ");
+		}
+
 		public void onBottom() {
 			System.out.println("######## onBottom() ########## ");
 			loadMoreData();
 		}
+		
+		
 	};
 	
 	public void onCreate(Bundle savedInstanceState) {
@@ -84,11 +80,11 @@ public class MainActivity extends Activity {
 		
 		// Initialise Volley Request Queue. 
 		mVolleyQueue = StaggeredDemoApplication.getRequestQueue();
-		mImageLoader = StaggeredDemoApplication.getImageLoader();
 		
 		mStaggeredView = (StaggeredGridView) findViewById(R.id.staggeredview);
 		mStaggeredView.init(2);
-		mStaggeredView.setMode(Mode.DISABLED);
+		mStaggeredView.setItemsBeforeToIntimate(5);
+/*		mStaggeredView.setMode(Mode.DISABLED);
 
 		mStaggeredView.setOnPullEventListener(new OnPullEventListener<ScrollView>() {
 
@@ -118,13 +114,14 @@ public class MainActivity extends Activity {
 			public void onPullUpToRefresh(final PullToRefreshBase<ScrollView> refreshView) {
 				flickerGetImagesRequest();
 			}
-		});
+		}); */
 		
 		mListFooter = (RelativeLayout) findViewById(R.id.footer);
+		mStaggeredView.setOnScrollListener(scrollListener);
 		
-		if(mStaggeredView.getMode() == Mode.DISABLED) {
-			mStaggeredView.setOnScrollListener(scrollListener);
-		}
+		/*if(mStaggeredView.getMode() == Mode.DISABLED) {
+			
+		}*/
 		
 		showProgress();
 		flickerGetImagesRequest();
@@ -145,10 +142,17 @@ public class MainActivity extends Activity {
 			mProgress.dismiss();
 	}
 	  
+	private static int bottomcount = 1;
 	private void loadMoreData() {
+		
+		if(bottomcount > 2)
+			return;
+		
 		if ( isLoading )
 			return;
 
+		bottomcount++;
+		
 		mListFooter.setVisibility(View.VISIBLE);
 		isLoading = true;
 		flickerGetImagesRequest();
@@ -166,7 +170,7 @@ public class MainActivity extends Activity {
 		builder.appendQueryParameter("per_page", "20");
 		builder.appendQueryParameter("page", Integer.toString(currPage));
 		
-		System.out.println("########## Flickr image request url ########### "+builder.toString());
+		//System.out.println("########## Flickr image request url ########### "+builder.toString());
 		
 		gsonObjRequest = new GsonRequest<FlickrResponsePhotos>(Request.Method.GET, builder.toString(),
 				FlickrResponsePhotos.class, null, new Response.Listener<FlickrResponsePhotos>() {
@@ -174,7 +178,7 @@ public class MainActivity extends Activity {
 			public void onResponse(FlickrResponsePhotos response) {
 				try { 
 					if(response != null) {
-						mStaggeredView.onRefreshComplete();
+						//mStaggeredView.onRefreshComplete();
 						parseFlickrImageResponse(response);
 						currPage++;
 					}
@@ -201,7 +205,7 @@ public class MainActivity extends Activity {
 				} else if( error instanceof NoConnectionError) {
 				} else if( error instanceof TimeoutError) {
 				}
-				mStaggeredView.onRefreshComplete();
+				//mStaggeredView.onRefreshComplete();
 				stopProgress();
 				showToast(error.getMessage());
 			}
@@ -232,17 +236,24 @@ public class MainActivity extends Activity {
 			
 				FlickrImage flkrImage = photos.getPhotos().get(index);
 				StaggeredGridViewItem item = null;
-				if( index%2==0) {
-					item = new FlickrGridItem4(this,flkrImage);
-					mStaggeredView.addItem(item);
-				} else if( index%3==0) {
-					item = new FlickrGridItem3(this,flkrImage);
+				int random = (int) (Math.random() * 4);
+				
+				if( random ==0) {
+					item = new FlickrGridItem1(flkrImage);
 					mStaggeredView.addItem(item);
 					
-				} else {
+				} else if( random == 1) {
 					item = new FlickrGridItem2(flkrImage);
 					mStaggeredView.addItem(item);
 					
+				} else if( random == 2) {
+					item = new FlickrGridItem3(this,flkrImage);
+					mStaggeredView.addItem(item);
+					
+				} else if( random == 3) {
+					item = new FlickrGridItem4(this,flkrImage);
+					mStaggeredView.addItem(item);
+
 				}
 			}
 	}
@@ -262,7 +273,7 @@ public class MainActivity extends Activity {
         @Override
         protected void onPostExecute(String[] result) {
                 // Call onRefreshComplete when the list has been refreshed.
-                mStaggeredView.onRefreshComplete();
+                //mStaggeredView.onRefreshComplete();
 
                 super.onPostExecute(result);
         }
