@@ -1,5 +1,7 @@
 package com.mani.staggeredview.demo.griditems;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -9,6 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
+import com.mani.staggeredview.demo.PictureActivity;
 import com.mani.staggeredview.demo.R;
 import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
 import com.mani.staggeredview.demo.model.FlickrImage;
@@ -16,12 +19,14 @@ import com.mani.view.StaggeredGridViewItem;
 
 public class FlickrGridItem2 extends StaggeredGridViewItem{
 
+	private Context mContext;
 	private ImageLoader mImageLoader;
 	private FlickrImage mImage;
 	private View mView;
 	
-	public FlickrGridItem2(FlickrImage image) {
-		mImage=image;
+	public FlickrGridItem2(Context context, FlickrImage image) {
+		mImage = image;
+		mContext = context;
 		mImageLoader=StaggeredDemoApplication.getImageLoader();
 	}
 	
@@ -33,12 +38,12 @@ public class FlickrGridItem2 extends StaggeredGridViewItem{
         mImageLoader.get(mImage.getImageUrl(), 
 				ImageLoader.getImageListener(image,R.drawable.bg_no_image, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
 		
-		mView.setOnClickListener(new View.OnClickListener() {
-			
+        image.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				System.out.println("######## GridView Item onclick########### ");
+				Intent intent = new Intent(mContext, PictureActivity.class);
+				intent.putExtra(PictureActivity.IMAGE_URL, mImage.getImageUrl());
+				mContext.startActivity(intent);
 			}
 		});
 		

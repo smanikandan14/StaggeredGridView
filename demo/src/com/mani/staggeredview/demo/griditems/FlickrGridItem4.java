@@ -23,6 +23,7 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
+import com.mani.staggeredview.demo.PictureActivity;
 import com.mani.staggeredview.demo.R;
 import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
 import com.mani.staggeredview.demo.model.FlickrComment;
@@ -39,9 +40,6 @@ public class FlickrGridItem4 extends StaggeredGridViewItem{
 	private FlickrImage mImage;
 	private String mUserId;
 	private View mView;
-	private TextView mProfileName;
-	private ImageView mProfileImage;
-	private String mPhotoUrl;
 	private int mHeight;
 	private TextView mComment1;
 	private TextView mComment2;
@@ -53,7 +51,6 @@ public class FlickrGridItem4 extends StaggeredGridViewItem{
 		mContext = context;
 		mImage=image;
 		mUserId=image.getOwner();
-		mPhotoUrl = "http://www.flickr.com/photos"+mUserId;
 		mVolleyQueue=StaggeredDemoApplication.getRequestQueue();
 		mImageLoader=StaggeredDemoApplication.getImageLoader();
 	}
@@ -130,12 +127,15 @@ public class FlickrGridItem4 extends StaggeredGridViewItem{
 		mImageLoader.get(mImage.getImageUrl(), 
 				ImageLoader.getImageListener(image,R.drawable.bg_no_image, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
 		
-		mView.setOnClickListener(new View.OnClickListener() {
+		image.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				
+				Intent intent = new Intent(mContext, PictureActivity.class);
+				intent.putExtra(PictureActivity.IMAGE_URL, mImage.getImageUrl());
+				mContext.startActivity(intent);
 			}
 		});
+
 		flickrGetCommentsRequest();
 		return mView;
 	}

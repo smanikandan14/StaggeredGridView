@@ -23,6 +23,7 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
+import com.mani.staggeredview.demo.PictureActivity;
 import com.mani.staggeredview.demo.R;
 import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
 import com.mani.staggeredview.demo.model.FlickrImage;
@@ -113,13 +114,32 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
         mImageLoader.get(mImage.getImageUrl(), 
 				ImageLoader.getImageListener(image,R.drawable.bg_no_image, android.R.drawable.ic_dialog_alert),parent.getWidth(),0);
 		
-		mView.setOnClickListener(new View.OnClickListener() {
+        image.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(mContext, PictureActivity.class);
+				intent.putExtra(PictureActivity.IMAGE_URL, mImage.getImageUrl());
+				mContext.startActivity(intent);
+			}
+		});
+
+        mProfileImage.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mProfileUrl));
 				mContext.startActivity(browserIntent);
 			}
 		});
+
+        mProfileName.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mProfileUrl));
+				mContext.startActivity(browserIntent);
+			}
+		});
+        
 		flickrGetUserRequest();
 		return mView;
 	}

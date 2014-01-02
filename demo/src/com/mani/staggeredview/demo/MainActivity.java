@@ -59,17 +59,11 @@ public class MainActivity extends Activity {
 		public void onScroll() {
 			System.out.println("######## onScroll() ########## ");
 		}
-		
-		public void onItemsBefore() {
-			System.out.println("######## onItemsBefore() ########## ");
-		}
 
 		public void onBottom() {
 			System.out.println("######## onBottom() ########## ");
 			loadMoreData();
 		}
-		
-		
 	};
 	
 	public void onCreate(Bundle savedInstanceState) {
@@ -83,46 +77,9 @@ public class MainActivity extends Activity {
 		
 		mStaggeredView = (StaggeredGridView) findViewById(R.id.staggeredview);
 		mStaggeredView.init(2);
-		mStaggeredView.setItemsBeforeToIntimate(5);
-/*		mStaggeredView.setMode(Mode.DISABLED);
 
-		mStaggeredView.setOnPullEventListener(new OnPullEventListener<ScrollView>() {
-
-			@Override
-			public void onPullEvent(PullToRefreshBase<ScrollView> refreshView,
-					State state, Mode direction) {
-
-				if(direction == Mode.PULL_FROM_START) {
-					System.out.println("########## PULL FROM START ######### ");
-			        refreshView.getLoadingLayoutProxy().setPullLabel("Pull down to refresh");
-				} else if( direction == Mode.PULL_FROM_END) {
-					System.out.println("########## PULL FROM END ######### ");
-					refreshView.getLoadingLayoutProxy().setPullLabel("Pull down to load more data");
-				}
-				
-			}
-			
-		});
-		
-		mStaggeredView.setOnRefreshListener(new OnRefreshListener2<ScrollView> () {
-			
-			public void onPullDownToRefresh(final PullToRefreshBase<ScrollView> refreshView) {
-		        new GetDataTask().execute();
-
-			}
-
-			public void onPullUpToRefresh(final PullToRefreshBase<ScrollView> refreshView) {
-				flickerGetImagesRequest();
-			}
-		}); */
-		
 		mListFooter = (RelativeLayout) findViewById(R.id.footer);
 		mStaggeredView.setOnScrollListener(scrollListener);
-		
-		/*if(mStaggeredView.getMode() == Mode.DISABLED) {
-			
-		}*/
-		
 		showProgress();
 		flickerGetImagesRequest();
 	}
@@ -169,8 +126,6 @@ public class MainActivity extends Activity {
 		builder.appendQueryParameter("nojsoncallback", "1");
 		builder.appendQueryParameter("per_page", "20");
 		builder.appendQueryParameter("page", Integer.toString(currPage));
-		
-		//System.out.println("########## Flickr image request url ########### "+builder.toString());
 		
 		gsonObjRequest = new GsonRequest<FlickrResponsePhotos>(Request.Method.GET, builder.toString(),
 				FlickrResponsePhotos.class, null, new Response.Listener<FlickrResponsePhotos>() {
@@ -239,11 +194,11 @@ public class MainActivity extends Activity {
 				int random = (int) (Math.random() * 4);
 				
 				if( random ==0) {
-					item = new FlickrGridItem1(flkrImage);
+					item = new FlickrGridItem1(this, flkrImage);
 					mStaggeredView.addItem(item);
 					
 				} else if( random == 1) {
-					item = new FlickrGridItem2(flkrImage);
+					item = new FlickrGridItem2(this, flkrImage);
 					mStaggeredView.addItem(item);
 					
 				} else if( random == 2) {
@@ -253,31 +208,9 @@ public class MainActivity extends Activity {
 				} else if( random == 3) {
 					item = new FlickrGridItem4(this,flkrImage);
 					mStaggeredView.addItem(item);
-
 				}
 			}
 	}
 	
-	private class GetDataTask extends AsyncTask<Void, Void, String[]> {
-
-        @Override
-        protected String[] doInBackground(Void... params) {
-                // Simulates a background job.
-                try {
-                        Thread.sleep(4000);
-                } catch (InterruptedException e) {
-                }
-                return null;
-        }
-
-        @Override
-        protected void onPostExecute(String[] result) {
-                // Call onRefreshComplete when the list has been refreshed.
-                //mStaggeredView.onRefreshComplete();
-
-                super.onPostExecute(result);
-        }
-	}
-
 
 }
