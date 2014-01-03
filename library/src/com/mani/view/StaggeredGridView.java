@@ -1,9 +1,13 @@
 package com.mani.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -24,7 +28,7 @@ public class StaggeredGridView extends ScrollView{
 	private Context mContext;
 	private int mColumnCount;
 	
-	/** A ScrollView has only one child. TopLayout is that **/
+	/** A ScrollView can have only one child. **/
 	private LinearLayout mTopLayout;
 	
 	/** Holds the list of LinearLayouts based on the grid view's column size **/
@@ -34,6 +38,10 @@ public class StaggeredGridView extends ScrollView{
 	
 	/** Holds the list of grid items **/
 	private List<StaggeredGridViewItem> mGridViewItems = new ArrayList<StaggeredGridViewItem>();
+	
+	private ArrayList<MyGlobalListener> mGlobalListeners = new ArrayList<MyGlobalListener>();
+	
+	private Map<LinearLayout, MyGlobalListener> mLayoutMap = new HashMap<LinearLayout, MyGlobalListener>();
 	
 	private final int MAX_COLUMNS_SUPPORTED = 4;
 	private int mColumnIndexToAdd = 0;
@@ -80,23 +88,18 @@ public class StaggeredGridView extends ScrollView{
 			itemLayout.setPadding(5, 10, 5, 100);
 			itemLayout.setOrientation(LinearLayout.VERTICAL);
 			itemLayout.setClickable(true);
+			MyGlobalListener globalListener = new MyGlobalListener();
+			mGlobalListeners.add(globalListener);
+			
 			ViewTreeObserver vto = itemLayout.getViewTreeObserver();
-
 		    if(vto.isAlive()){
-		        vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-		            @Override
-		            public void onGlobalLayout() {
-			            for(LinearLayout parent: mGridLayouts) {
-			            	System.out.println("######### Height of layout  ########## "+parent+ ":"+parent.getMeasuredHeight());
-			            	
-			            }
-		            } 
-		        });
+		    	vto.addOnGlobalLayoutListener(globalListener);
 		    }
 
 		    itemLayout.setLayoutParams(itemParam);
 			
 			mGridLayouts.add(itemLayout);
+			mLayoutMap.put(itemLayout, globalListener);
 			mTopLayout.addView(itemLayout);
 			mItemsHeight.add(Integer.valueOf(i));
 		}
@@ -169,12 +172,80 @@ public class StaggeredGridView extends ScrollView{
 		}
 	}
 	
+	boolean inCalculate = false;
+	
 	private void recalculatePositions() {
 		
-		//Find biggest height among linearlayouts.
+		if( inCalculate )
+			return;
 		
-		//
+		inCalculate = true;
 		
+		LinearLayout smallHeightLayout = mGridLayouts.get(0);
+		LinearLayout largerHeightLayout = mGridLayouts.get(0);
+		
+		for(LinearLayout layout: mGridLayouts) {
+			int height = layout.getMeasuredHeight();
+			int smallHeight = smallHeightLayout.getMeasuredHeight();
+			int largerHeight = largerHeightLayout.getMeasuredHeight();
+			
+			if( height < smallHeight ) {
+				smallHeightLayout = layout;
+			}  
+			
+			if( height > largerHeight) {
+				largerHeightLayout = layout;
+			}
+		}
+		
+/*		smallHeightLayout.addOnLayoutChangeListener( new OnLayoutChangeListener() {
+			
+			@Override
+			public void onLayoutChange(View v, int left, int top, int right,
+					int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+				// TODO Auto-generated method stub
+				
+			}
+		});*/
+		
+//		removeOnGlobalLayoutListener( smallHeightLayout, mLayoutMap.get(smallHeightLayout));
+//		removeOnGlobalLayoutListener( largerHeightLayout, mLayoutMap.get(largerHeightLayout));
+		
+		if(smallHeightLayout.getChildCount() > 0 ) {
+			View v = largerHeightLayout.getChildAt(smallHeightLayout.getChildCount()-1);
+			if( v != null) {
+				largerHeightLayout.removeView(v);
+				smallHeightLayout.addView(v);
+			}
+		}
+
+		inCalculate = false;
+		
+/*		ViewTreeObserver vto = smallHeightLayout.getViewTreeObserver();
+	    if(vto.isAlive()){
+	    	vto.addOnGlobalLayoutListener(mLayoutMap.get(smallHeightLayout));
+	    }
+
+	    vto = largerHeightLayout.getViewTreeObserver();
+	    if(vto.isAlive()){
+	    	vto.addOnGlobalLayoutListener(mLayoutMap.get(largerHeightLayout));
+	    } */
+	}
+
+	public class MyGlobalListener implements OnGlobalLayoutListener {
+		@Override
+		public void onGlobalLayout() {
+			recalculatePositions();
+		}
+	}
+	
+	@TargetApi(16)
+	public static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener){
+	    if (Build.VERSION.SDK_INT < 16) {
+	        v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
+	    } else {
+	        v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+	    }
 	}
 	
 	private void datasetChanged() {

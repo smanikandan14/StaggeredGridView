@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
 		}
 		
 		public void onScroll() {
-			System.out.println("######## onScroll() ########## ");
+
 		}
 
 		public void onBottom() {
@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
 		mVolleyQueue = StaggeredDemoApplication.getRequestQueue();
 		
 		mStaggeredView = (StaggeredGridView) findViewById(R.id.staggeredview);
-		mStaggeredView.init(2);
+		mStaggeredView.init(3);
 
 		mListFooter = (RelativeLayout) findViewById(R.id.footer);
 		mStaggeredView.setOnScrollListener(scrollListener);
