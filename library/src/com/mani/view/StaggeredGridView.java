@@ -1,9 +1,7 @@
 package com.mani.view;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -19,14 +17,22 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 /**
- * Cannot change items and call refresh or notifydatasetChanged.
- * @author maniselvaraj
+ * Simple StaggeredGridView implementation using scrollview.
+ * 
+ * Supports different type of items.
+ * 
+ * Supports two mode of item arrangement in gridview.
+ * 
+ * 		FIXED - If the item's height are known(fixed) Use this mode. Items are arranged in the order in which it is added to the grid view.
+ * 
+ * 		DYNAMIC - Order is not maintained. If the item content changes dynamically for example, a image is downloaded 
+ * 				  and the size is unknown. Use this mode, so that item positions are re-calculated
+ * 				  when a change in height for an item is detected and height between columns are maintained close to equal. 
+ * 
+ * @author Mani Selvaraju
  *
  */
 public class StaggeredGridView extends ScrollView{
-	
-	private Context mContext;
-	private int mColumnCount;
 	
 	/** A ScrollView can have only one child. **/
 	private LinearLayout mTopLayout;
@@ -39,26 +45,35 @@ public class StaggeredGridView extends ScrollView{
 	/** Holds the list of grid items **/
 	private List<StaggeredGridViewItem> mGridViewItems = new ArrayList<StaggeredGridViewItem>();
 	
-	private ArrayList<MyGlobalListener> mGlobalListeners = new ArrayList<MyGlobalListener>();
-	
-	private Map<LinearLayout, MyGlobalListener> mLayoutMap = new HashMap<LinearLayout, MyGlobalListener>();
+	private OnGlobalLayoutListener mOnGlobalLayoutChangeListener = null;
 	
 	private final int MAX_COLUMNS_SUPPORTED = 4;
+	private final int SCROLL_OFFSET = 3;
+
+	private Context mContext;
+	private int mColumns;
 	private int mColumnIndexToAdd = 0;
 	private int showedItemCount = 0;
+	private int mPreviousColumnItemAdded = 0;
 	
-	private static Handler mHandler = new Handler();
-	
-	private final int SCROLL_OFFSET=3;
-	
+	/**
+	 * Callbacks for different events of scrolling. 
+	 *
+	 */
 	public interface OnScrollListener {
 		public void onTop();
 		public void onScroll();
 		public void onBottom();
 	}
 	
+	public enum Mode {
+		FIXED,
+		DYNAMIC
+	};
+	
 	private OnScrollListener mScrollListener;
-
+	private Mode mMode = Mode.FIXED;
+	
 	public StaggeredGridView(Context context) {
 		super(context);
 		mContext = context;
@@ -69,39 +84,53 @@ public class StaggeredGridView extends ScrollView{
 		mContext = context;
 	}
 
-	public void init(int columncount) {
+	private Handler mHandler = new Handler();
+	
+	/**
+	 * Supply number of columns the grid view to show and mode.
+	 * @param columncount
+	 * @param mode
+	 */
+	public void initialize(int columncount, Mode mode) {
 		
-		if ( columncount > MAX_COLUMNS_SUPPORTED ) {
+		if( columncount > MAX_COLUMNS_SUPPORTED ) {
 			Log.e("StaggeredGridView", "Number of columns supplied exceeds the maximum supported column..");
 			throw new IllegalArgumentException("Column count cannot be more than maximum supported in init() ");
 		}
 
-		mColumnCount = columncount;
+		mColumns = columncount;
+		mMode = mode;
 		mTopLayout = new LinearLayout(mContext);
 		mGridLayouts = new ArrayList<LinearLayout>();
 		mItemsHeight = new ArrayList<Integer>();
 
-		for (int i = 0; i < mColumnCount; i++) {
+		for( int i = 0; i < mColumns; i++ ) {
 			LinearLayout itemLayout = new LinearLayout(mContext);
 			LinearLayout.LayoutParams itemParam = new LinearLayout.LayoutParams(
-					0, LayoutParams.WRAP_CONTENT, 1.0f/mColumnCount);
+					0, LayoutParams.WRAP_CONTENT, 1.0f/mColumns);
 			itemLayout.setPadding(5, 10, 5, 100);
 			itemLayout.setOrientation(LinearLayout.VERTICAL);
 			itemLayout.setClickable(true);
-			MyGlobalListener globalListener = new MyGlobalListener();
-			mGlobalListeners.add(globalListener);
-			
-			ViewTreeObserver vto = itemLayout.getViewTreeObserver();
-		    if(vto.isAlive()){
-		    	vto.addOnGlobalLayoutListener(globalListener);
-		    }
-
 		    itemLayout.setLayoutParams(itemParam);
 			
 			mGridLayouts.add(itemLayout);
-			mLayoutMap.put(itemLayout, globalListener);
 			mTopLayout.addView(itemLayout);
 			mItemsHeight.add(Integer.valueOf(i));
+		}
+		
+		mOnGlobalLayoutChangeListener = new OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				if( mGridLayouts.get(0).getChildCount() > 1 || 
+						mGridLayouts.get(1).getChildCount() > 1 ) {
+					removeListeners();
+					reCalculatePositions();
+				}
+			}
+		};
+
+		if( mMode == Mode.DYNAMIC ) {
+			registerLayoutChangeListener();
 		}
 		
 		this.addView(mTopLayout);
@@ -112,7 +141,7 @@ public class StaggeredGridView extends ScrollView{
 		mColumnIndexToAdd = 0;
 		mItemsHeight.clear();
 
-		for (int i = 0; i < mColumnCount; i++) {
+		for( int i = 0; i < mColumns; i++ ) {
 			LinearLayout layout = mGridLayouts.get(i);
 			layout.removeAllViews();
 			mItemsHeight.add(Integer.valueOf(0));
@@ -121,6 +150,10 @@ public class StaggeredGridView extends ScrollView{
 		this.smoothScrollTo(0,0);
 	}
 
+	public int size() {
+		return mGridViewItems.size();
+	}
+	
 	public OnScrollListener getScrollListener() {
 		return mScrollListener;
 	}
@@ -132,18 +165,14 @@ public class StaggeredGridView extends ScrollView{
 	@Override
 	protected void onScrollChanged(int x, int y, int oldX, int oldY) {
 		super.onScrollChanged(x, y, oldX, oldY);
-		//System.out.println("####### onScrollChanged y oldY  ######### "+y+":"+oldY+" GetHeight() "+getHeight()+" : "+mTopLayout.getMeasuredHeight());
 
-		if (Math.abs(y - oldY) < 2 || 
+		if ( Math.abs(y - oldY) < 2 || 
 				y+getHeight() >= mTopLayout.getMeasuredHeight() ||
-				y <= SCROLL_OFFSET+1) {
-			if (mScrollListener != null) {
-				if (y <= SCROLL_OFFSET+1) {
-					System.out.println("####### onScrollChanged onTop ######### ");
+				y <= SCROLL_OFFSET+1 ) {
+			if( mScrollListener != null ) {
+				if( y <= SCROLL_OFFSET+1 ) {
 					mScrollListener.onTop();
-
-				} else if (y+getHeight() >= mTopLayout.getMeasuredHeight()) {
-					System.out.println("####### onScrollChanged onBottom ######### ");
+				} else if( y+getHeight() >= mTopLayout.getMeasuredHeight() ) {
 					mScrollListener.onBottom();
 				}
 			}
@@ -151,36 +180,15 @@ public class StaggeredGridView extends ScrollView{
 			mScrollListener.onScroll();
 		}
 	}
-	
-	int itemsBefore;
-	
-	public void setItemsBeforeToIntimate(int items) {
-		itemsBefore = items;
-	}
-	
-	public void addItem(StaggeredGridViewItem item) {
-		mGridViewItems.add(item);
-		datasetChanged();
-	}
-	
-	public void addItemsList(List<StaggeredGridViewItem> itemlist) {
-		if( itemlist != null && itemlist.size() > 0 ) {
-			for(StaggeredGridViewItem item: itemlist) {
-				mGridViewItems.add(item);
-			}
-			datasetChanged();
-		}
-	}
-	
-	boolean inCalculate = false;
-	
-	private void recalculatePositions() {
-		
-		if( inCalculate )
-			return;
-		
-		inCalculate = true;
-		
+
+	/**
+	 * When height of a grid item changes dynamically,  
+	 * 1 - Find the layout which has smallest height and largest height among the columns.
+	 * 2 - Remove the last element of the largest height layout and add to the smallest height layout.
+	 * 3 - Register for the global layout change listener again.
+	 */
+	private void reCalculatePositions() {
+
 		LinearLayout smallHeightLayout = mGridLayouts.get(0);
 		LinearLayout largerHeightLayout = mGridLayouts.get(0);
 		
@@ -198,57 +206,82 @@ public class StaggeredGridView extends ScrollView{
 			}
 		}
 		
-/*		smallHeightLayout.addOnLayoutChangeListener( new OnLayoutChangeListener() {
-			
-			@Override
-			public void onLayoutChange(View v, int left, int top, int right,
-					int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-				// TODO Auto-generated method stub
-				
-			}
-		});*/
-		
-//		removeOnGlobalLayoutListener( smallHeightLayout, mLayoutMap.get(smallHeightLayout));
-//		removeOnGlobalLayoutListener( largerHeightLayout, mLayoutMap.get(largerHeightLayout));
-		
-		if(smallHeightLayout.getChildCount() > 0 ) {
-			View v = largerHeightLayout.getChildAt(smallHeightLayout.getChildCount()-1);
-			if( v != null) {
-				largerHeightLayout.removeView(v);
-				smallHeightLayout.addView(v);
-			}
+		View v = largerHeightLayout.getChildAt(smallHeightLayout.getChildCount()-1);
+		if( v != null) {
+			largerHeightLayout.removeView(v);
+			smallHeightLayout.addView(v);
 		}
-
-		inCalculate = false;
 		
-/*		ViewTreeObserver vto = smallHeightLayout.getViewTreeObserver();
-	    if(vto.isAlive()){
-	    	vto.addOnGlobalLayoutListener(mLayoutMap.get(smallHeightLayout));
-	    }
-
-	    vto = largerHeightLayout.getViewTreeObserver();
-	    if(vto.isAlive()){
-	    	vto.addOnGlobalLayoutListener(mLayoutMap.get(largerHeightLayout));
-	    } */
+		// Post the register layout change listener on the main thread, so that moving the positions
+		// ( addView, removeView ) doesn't trigger onGlobalLayoutChange event.
+		mHandler.post(new Runnable() {
+			public void run() {
+				registerLayoutChangeListener();	
+			}
+		});
+   		
 	}
-
-	public class MyGlobalListener implements OnGlobalLayoutListener {
-		@Override
-		public void onGlobalLayout() {
-			recalculatePositions();
-		}
+	
+	private void registerLayoutChangeListener() {
+	    ViewTreeObserver vto = mTopLayout.getViewTreeObserver();
+	    if(vto.isAlive()){
+	    	vto.addOnGlobalLayoutListener(mOnGlobalLayoutChangeListener);
+	    } 
+	}
+	
+	private void removeListeners() {
+		removeOnGlobalLayoutListener ( mTopLayout, mOnGlobalLayoutChangeListener);
 	}
 	
 	@TargetApi(16)
 	public static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener){
 	    if (Build.VERSION.SDK_INT < 16) {
-	        v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
+	    	v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);    
 	    } else {
 	        v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
-	    }
+	    } 
+	    
 	}
 	
-	private void datasetChanged() {
+	public void addItem(StaggeredGridViewItem item) {
+		mGridViewItems.add(item);
+		addItems(item);
+	}
+	
+	public void addItemsList(List<StaggeredGridViewItem> itemlist) {
+		if( itemlist != null && itemlist.size() > 0 ) {
+			for(StaggeredGridViewItem item: itemlist) {
+				mGridViewItems.add(item);
+				addItems(item);
+			}
+			
+		}
+	}
+
+	private void addItems(StaggeredGridViewItem item) {
+		if( mMode == Mode.FIXED ) {
+			addItemInFixedMode(item);
+		} else if( mMode == Mode.DYNAMIC ) {
+			addItemInDynamicMode(item);
+		}
+	}
+	
+	/**
+	 * Adds the item in the order in which it is added to gridview.
+	 */
+	private void addItemInFixedMode(StaggeredGridViewItem item) {
+		if( (mPreviousColumnItemAdded + 1) > (mColumns-1) ) {
+			mPreviousColumnItemAdded = 0;
+		}
+		mColumnIndexToAdd = mPreviousColumnItemAdded;
+		mPreviousColumnItemAdded ++;
+		addToLayout(item, mColumnIndexToAdd);
+	}
+	
+	/**
+	 * Finds the column to which item has to be added by comparing the heights of the layout.
+	 */
+	private void addItemInDynamicMode(StaggeredGridViewItem item) {
 	
 		int count = mGridViewItems.size();
 		
@@ -256,7 +289,7 @@ public class StaggeredGridView extends ScrollView{
 			for (int i = showedItemCount; i < count; i++) {
 				mColumnIndexToAdd = 0;
 				int minHeight = mItemsHeight.get(0);
-				for (int j = 1; j < mColumnCount; j++) {
+				for (int j = 1; j < mColumns; j++) {
 					if (minHeight > mItemsHeight.get(j)) {
 						minHeight = mItemsHeight.get(j);
 						mColumnIndexToAdd = j;

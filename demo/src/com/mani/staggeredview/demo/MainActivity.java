@@ -5,7 +5,6 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -23,7 +22,6 @@ import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.mani.staggeredview.demo.app.StaggeredDemoApplication;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem1;
 import com.mani.staggeredview.demo.griditems.FlickrGridItem2;
@@ -53,7 +51,6 @@ public class MainActivity extends Activity {
 	
 	private OnScrollListener scrollListener = new OnScrollListener() {
 		public void onTop() {
-			System.out.println("######## onTOp() ########## ");
 		}
 		
 		public void onScroll() {
@@ -61,7 +58,6 @@ public class MainActivity extends Activity {
 		}
 
 		public void onBottom() {
-			System.out.println("######## onBottom() ########## ");
 			loadMoreData();
 		}
 	};
@@ -76,7 +72,7 @@ public class MainActivity extends Activity {
 		mVolleyQueue = StaggeredDemoApplication.getRequestQueue();
 		
 		mStaggeredView = (StaggeredGridView) findViewById(R.id.staggeredview);
-		mStaggeredView.init(3);
+		mStaggeredView.initialize(2, StaggeredGridView.Mode.DYNAMIC);
 
 		mListFooter = (RelativeLayout) findViewById(R.id.footer);
 		mStaggeredView.setOnScrollListener(scrollListener);
@@ -99,17 +95,11 @@ public class MainActivity extends Activity {
 			mProgress.dismiss();
 	}
 	  
-	private static int bottomcount = 1;
 	private void loadMoreData() {
-		
-		if(bottomcount > 2)
-			return;
 		
 		if ( isLoading )
 			return;
 
-		bottomcount++;
-		
 		mListFooter.setVisibility(View.VISIBLE);
 		isLoading = true;
 		flickerGetImagesRequest();
