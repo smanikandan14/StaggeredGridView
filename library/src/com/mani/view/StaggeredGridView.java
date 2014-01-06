@@ -24,18 +24,18 @@ import android.widget.ScrollView;
  * 
  * Supports two mode of item arrangement in gridview.
  * 
- * 		FIXED - If the item's height are known(fixed) Use this mode. Items are arranged in the order in which it is added to the grid view.
+ * FIXED - If the item's height are known(fixed) Use this mode. Items are arranged in the order in which it is added to the grid view.
  * 
- * 		DYNAMIC - Order is not maintained. If the item content changes dynamically for example, a image is downloaded 
- * 				  and the size is unknown. Use this mode, so that item positions are re-calculated
- * 				  when a change in height for an item is detected and height between columns are maintained close to equal. 
+ * DYNAMIC - Order is not maintained. If the item content changes dynamically for example, a image is downloaded 
+ * 		  and the size is unknown. Use this mode, so that item positions are re-calculated
+ * 		  when a change in height for an item is detected and height between columns are maintained close to equal. 
  * 
  * @author Mani Selvaraju
  *
  */
 public class StaggeredGridView extends ScrollView{
 	
-	/** A ScrollView can have only one child. **/
+	/** A ScrollView can have only one child. This is the top layout which holds the column layouts. **/
 	private LinearLayout mTopLayout;
 	
 	/** Holds the list of LinearLayouts based on the grid view's column size **/
@@ -58,6 +58,7 @@ public class StaggeredGridView extends ScrollView{
 	private int mColumnIndexToAdd = 0;
 	private int showedItemCount = 0;
 	private int mPreviousColumnItemAdded = 0;
+	private boolean isInitialized = false;
 	
 	/**
 	 * Callbacks for different events of scrolling. 
@@ -103,18 +104,24 @@ public class StaggeredGridView extends ScrollView{
 		
 		TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.StaggeredGridView);
 		final int indexCount = typedArray.getIndexCount();
-		
-        for(int i = 0; i < indexCount; i++){
-            int attr = typedArray.getIndex(i);
-            switch(attr){
-                case R.styleable.StaggeredGridView_columnCount:
-                	count = typedArray.getInteger(attr, -1);
-                    break;
-                case R.styleable.StaggeredGridView_mode:
-                    modeattr = typedArray.getString(R.styleable.StaggeredGridView_mode);
-                    break;
-            }
-        }
+
+		for(int i = 0; i < indexCount; i++){
+			int attr = typedArray.getIndex(i);
+			switch(attr){
+				case R.styleable.StaggeredGridView_columnCount:
+					count = typedArray.getInteger(attr, -1);
+					if( count != -1) {
+						isInitialized = true;
+					}
+					break;
+				case R.styleable.StaggeredGridView_mode:
+					modeattr = typedArray.getString(R.styleable.StaggeredGridView_mode);
+					if( modeattr != null && modeattr.length() > 1 ) { 
+						isInitialized = true;
+					}
+					break;
+			}
+		}
         
         typedArray.recycle();
         
@@ -130,11 +137,15 @@ public class StaggeredGridView extends ScrollView{
 	}
 
 	/**
-	 * Supply number of columns the grid view to show and mode.
+	 * Supply number of columns the grid view to show and the mode.
 	 * @param columncount
 	 * @param mode
 	 */
 	public void initialize(int columncount, Mode mode) {
+		
+		if( isInitialized ) {
+			throw new UnsupportedOperationException("Cannot call initialize twice. Check have you initialized from xml. ");
+		}
 		
 		if( columncount > MAX_COLUMNS_SUPPORTED ) {
 			Log.e("StaggeredGridView", "Number of columns supplied exceeds the maximum supported column..");
@@ -177,6 +188,7 @@ public class StaggeredGridView extends ScrollView{
 		}
 		
 		this.addView(mTopLayout);
+		isInitialized = true;
 	}
 	
 	public void clear() {
@@ -210,12 +222,12 @@ public class StaggeredGridView extends ScrollView{
 		super.onScrollChanged(x, y, oldX, oldY);
 
 		if ( Math.abs(y - oldY) < 2 || 
-				y+getHeight() >= mTopLayout.getMeasuredHeight() ||
+				y + getHeight() >= mTopLayout.getMeasuredHeight() ||
 				y <= SCROLL_OFFSET+1 ) {
 			if( mScrollListener != null ) {
 				if( y <= SCROLL_OFFSET+1 ) {
 					mScrollListener.onTop();
-				} else if( y+getHeight() >= mTopLayout.getMeasuredHeight() ) {
+				} else if( y + getHeight() >= mTopLayout.getMeasuredHeight() ) {
 					mScrollListener.onBottom();
 				}
 			}
