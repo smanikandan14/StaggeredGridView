@@ -5,6 +5,8 @@ StaggeredGridView
 
 Simple StaggeredGridView implementation using ScrollView.
 
+![alt text](https://raw.github.com/smanikandan14/StaggeredGridView/master/Staggered1_SNAPSHOT.png "")
+
 
 ## Introduction
 
@@ -14,6 +16,9 @@ Simple StaggeredGridView implementation using ScrollView.
 ## Usage
 
 ## Simple Example.
+
+![alt text](https://raw.github.com/smanikandan14/StaggeredGridView/master/Staggered3_SNAPSHOT.png "")
+
 
 ## Cons
 
