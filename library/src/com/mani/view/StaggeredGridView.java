@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -51,6 +52,8 @@ public class StaggeredGridView extends ScrollView{
 	private final int SCROLL_OFFSET = 3;
 
 	private Context mContext;
+	private Handler mHandler = new Handler();
+	
 	private int mColumns;
 	private int mColumnIndexToAdd = 0;
 	private int showedItemCount = 0;
@@ -67,8 +70,18 @@ public class StaggeredGridView extends ScrollView{
 	}
 	
 	public enum Mode {
-		FIXED,
-		DYNAMIC
+		FIXED("fixed"),
+		DYNAMIC("dynamic");
+		
+		private String name;
+		
+		Mode(String name ) {
+			this.name = name;
+		}
+		
+		public String toString() {
+			return this.name;
+		}
 	};
 	
 	private OnScrollListener mScrollListener;
@@ -81,11 +94,41 @@ public class StaggeredGridView extends ScrollView{
 
 	public StaggeredGridView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		
 		mContext = context;
+		int count = 2;
+		//Default to FIXED mode.
+		Mode mode = Mode.FIXED;
+		String modeattr = null;
+		
+		TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.StaggeredGridView);
+		final int indexCount = typedArray.getIndexCount();
+		
+        for(int i = 0; i < indexCount; i++){
+            int attr = typedArray.getIndex(i);
+            switch(attr){
+                case R.styleable.StaggeredGridView_columnCount:
+                	count = typedArray.getInteger(attr, -1);
+                    break;
+                case R.styleable.StaggeredGridView_mode:
+                    modeattr = typedArray.getString(R.styleable.StaggeredGridView_mode);
+                    break;
+            }
+        }
+        
+        typedArray.recycle();
+        
+        if( modeattr != null ) {
+        	if( modeattr.equals(Mode.FIXED.toString())) {
+        		mode = Mode.FIXED;
+        	} else if( modeattr.equals(Mode.DYNAMIC.toString())) {
+        		mode = Mode.DYNAMIC;
+        	}
+        }
+        
+        initialize(count, mode);
 	}
 
-	private Handler mHandler = new Handler();
-	
 	/**
 	 * Supply number of columns the grid view to show and mode.
 	 * @param columncount

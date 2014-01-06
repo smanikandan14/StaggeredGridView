@@ -72,12 +72,12 @@ public class MainActivity extends Activity {
 		mVolleyQueue = StaggeredDemoApplication.getRequestQueue();
 		
 		mStaggeredView = (StaggeredGridView) findViewById(R.id.staggeredview);
-		mStaggeredView.initialize(2, StaggeredGridView.Mode.DYNAMIC);
+		//mStaggeredView.initialize(2, StaggeredGridView.Mode.DYNAMIC);
 
 		mListFooter = (RelativeLayout) findViewById(R.id.footer);
 		mStaggeredView.setOnScrollListener(scrollListener);
 		showProgress();
-		flickerGetImagesRequest();
+		//flickerGetImagesRequest();
 	}
 	
 	
