@@ -110,15 +110,9 @@ public class StaggeredGridView extends ScrollView{
 			switch(attr){
 				case R.styleable.StaggeredGridView_columnCount:
 					count = typedArray.getInteger(attr, -1);
-					if( count != -1) {
-						isInitialized = true;
-					}
 					break;
 				case R.styleable.StaggeredGridView_mode:
 					modeattr = typedArray.getString(R.styleable.StaggeredGridView_mode);
-					if( modeattr != null && modeattr.length() > 1 ) { 
-						isInitialized = true;
-					}
 					break;
 			}
 		}
