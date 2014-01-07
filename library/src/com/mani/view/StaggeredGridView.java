@@ -367,7 +367,7 @@ public class StaggeredGridView extends ScrollView{
 		Integer currentHeight = mItemsHeight.get(columnIndex);
 		currentHeight = currentHeight + itemHeight;
 		mItemsHeight.set(columnIndex, currentHeight);
-
+		
 	}
 	
 }
