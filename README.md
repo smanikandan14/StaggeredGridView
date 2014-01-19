@@ -77,9 +77,11 @@ Register for onScroll events through **setOnScrollListener()** method.
 ```
 
 ## Demo Example.
-Demo uses Flickr api to list down different items in the gridview. Each item is different and explained in the below picture.
+Demo uses Flickr api to download images and list down different items in the gridview. Each item is different and explained in the below picture.
 
 Each item has it own onClickListener implemented. Since each item is written in a new class, it is easy to maintain the business logic for each item in a single class. 
+
+Demo uses Volley as networking library for downloading images. More details about volley library refer [Volley-demo](https://github.com/smanikandan14/Volley-demo)
 
 ![alt text](https://raw.github.com/smanikandan14/StaggeredGridView/master/Staggered3_SNAPSHOT.png "")
 
