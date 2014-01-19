@@ -319,7 +319,7 @@ public class StaggeredGridView extends ScrollView{
 	 * Adds the item in the order in which it is added to gridview.
 	 */
 	private void addItemInFixedMode(StaggeredGridViewItem item) {
-		if( (mPreviousColumnItemAdded + 1) > (mColumns-1) ) {
+		if( (mPreviousColumnItemAdded + 1) > (mColumns) ) {
 			mPreviousColumnItemAdded = 0;
 		}
 		mColumnIndexToAdd = mPreviousColumnItemAdded;

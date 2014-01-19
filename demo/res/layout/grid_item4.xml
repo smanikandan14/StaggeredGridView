@@ -8,8 +8,7 @@
     <ImageView
         android:id="@+id/image"
 	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:minHeight="50dp"
+	    android:layout_height="150dp"
 	    android:scaleType="fitXY"/>
 
 <RelativeLayout 

@@ -2,7 +2,6 @@ package com.mani.staggeredview.demo.app;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -25,7 +24,7 @@ public class StaggeredDemoApplication extends Application {
 		
 		mRequestQueue = Volley.newRequestQueue(applicationContext);
 		long size = Runtime.getRuntime().maxMemory()/4;
-		mBitmapCache = new BitmapLruCache((int)size);
+		mBitmapCache = new BitmapLruCache(50);//(int)size);
 		mImageLoader = new ImageLoader(mRequestQueue, mBitmapCache);
 	}
 	

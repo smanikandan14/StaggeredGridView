@@ -68,10 +68,7 @@ public class FlickrGridItem3 extends StaggeredGridViewItem{
 			@Override
 			public void onResponse(FlickrProfileResponse response) {
 				try { 
-					System.out.println("########## FlickrProfileResponse not null ########## "+response);
 					if(response != null) {
-						System.out.println("########## FlickrProfileResponse not null ########### "+response.getPerson().getProfileImageUrl()+" : "+
-								response.getPerson().getRealname());
 				        mImageLoader.get(response.getPerson().getProfileImageUrl(), 
 								ImageLoader.getImageListener(mProfileImage, R.drawable.bg_no_image, android.R.drawable.ic_dialog_alert));
 				        mProfileName.setText(response.getPerson().getProfileName());

@@ -70,7 +70,6 @@ public class FlickrGridItem4 extends StaggeredGridViewItem{
 			@Override
 			public void onResponse(FlickrGetCommentsResponse response) {
 				try { 
-					System.out.println("########## FlickrGetCommentsResponse not null ########## "+response);
 					if(response != null) {
 						int count=0;
 						for(FlickrComment comment: response.getComments().getComments()) {

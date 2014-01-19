@@ -10,7 +10,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent" 
 	    staggered:columnCount="2"
-	    staggered:mode="dynamic"/>
+	    staggered:mode="fixed"/>
     
         <RelativeLayout
             android:id="@+id/footer"
